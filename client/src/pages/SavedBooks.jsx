@@ -15,15 +15,12 @@ import { REMOVE_BOOK } from '../utils/mutations';
 
 const SavedBooks = () => {
 
-  // Replaced useEffect with a useQuery when SavedBooks is called
   const { loading, data } = useQuery(GET_ME);
 
   let userData = data?.me || {};
 
-  // Mutation to remove book from user
   const [deleteBook] = useMutation(REMOVE_BOOK);
 
-  // create function that accepts the book's mongo _id value as param and deletes the book from the database
   const handleDeleteBook = async (bookId) => {
     const token = Auth.loggedIn() ? Auth.getToken() : null;
 
@@ -32,25 +29,25 @@ const SavedBooks = () => {
     }
 
     try {
-
-      // Changed code to fetch data with GraphQL instead of API
-      const { updatedUser } = await deleteBook({
+      const { data } = await deleteBook({
         variables: {
           bookId: bookId
         }
-      })
+      });
 
-      userData = updatedUser;
-      // upon success, remove book's id from localStorage
+      userData = data.removeBook;
       removeBookId(bookId);
     } catch (err) {
       console.error(err);
     }
   };
 
-  // if data isn't here yet, say so
   if (loading) {
     return <h2>LOADING...</h2>;
+  }
+
+  if (!userData.savedBooks || !userData.savedBooks.length) {
+    return <h2>You have no saved books!</h2>;
   }
 
   return (
