@@ -36,15 +36,22 @@ const resolvers = {
       return { token, user };
     },
     saveBook: async (parent, { bookData }, context) => {
+      console.log(context)
       if (context.user) {
-        const updatedUser = await User.findByIdAndUpdate(
-          context.user._id,
-          { $addToSet: { savedBooks: bookData } },
-          { new: true }
-        );
-        return updatedUser;
+        try {
+          const updatedUser = await User.findByIdAndUpdate(
+            context.user._id,
+            { $addToSet: { savedBooks: bookData } },
+            { new: true }
+          );
+          return updatedUser;
+        } catch (error) {
+          
+          throw AuthenticationError ;
+        }
+        
       }
-      throw new AuthenticationError('Not logged in');
+      
     },
     removeBook: async (parent, { bookId }, context) => {
       if (context.user) {
